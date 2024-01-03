@@ -11,6 +11,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.yearup.data.mysql.MySqlProductDao.mapRow;
+
 @Component
 public class MySqlCategoryDao extends MySqlDaoBase implements CategoryDao {
     public MySqlCategoryDao(DataSource dataSource) {
@@ -23,24 +25,40 @@ public class MySqlCategoryDao extends MySqlDaoBase implements CategoryDao {
 
         String sql = "SELECT * FROM categories";
 
-        try(var connection = getConnection();
+        try (var connection = getConnection();
             var statement = connection.prepareStatement(sql);
-            var resultSet = statement.executeQuery()) {\
+            var resultSet = statement.executeQuery()) {
 
             while (resultSet.next()) {
                 Category category = mapRow(resultSet);
                 categories.add(category);
-            }
-        catch (SQLException e) {
-                throw new RuntimeException(e) {
-                }
-                return categories;
-            }
-            
 
-    @Override
-    public Category getById(int categoryId) {
+
+
+
+            }
+        return categories;
+        } catch (SQLException ex) {
+            throw new RuntimeException(ex);
+        }
+
+        public Category getById(int categoryId){
         // get category by id
+        String sql = "SELECT * FROM categories WHERE category_id = ?";
+
+        try (var connection = getConnection();
+             var statement = connection.prepareStatement(sql)) {
+
+            statement.setInt(1, categoryId);
+
+            try (var resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return mapRow(resultSet);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
         return null;
     }
 
@@ -148,4 +166,6 @@ public class MySqlCategoryDao extends MySqlDaoBase implements CategoryDao {
         }};
                 return category;
     }
-}
+} catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
