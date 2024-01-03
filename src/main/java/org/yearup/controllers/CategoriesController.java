@@ -23,10 +23,12 @@ import java.util.List;
 @CrossOrigin
 public class CategoriesController {
     private final CategoryDao categoryDao;
+    private ProductDao productDao;
 
     @Autowired //automatically injects instances of CategoryDao and ProductDao
     public CategoriesController(CategoryDao categoryDao, ProductDao productDao) {
         this.categoryDao = categoryDao;
+        this.productDao = productDao;
     }
 
     @GetMapping(path = "/categories", method = RequestMethod.GET)
@@ -40,7 +42,8 @@ public class CategoriesController {
     }
 
     // add the appropriate annotation for a get action
-
+@GetMapping(path = "/categories/{id}", method = RequestMethod.GET)
+@PreAuthorize("permitAll()")
     public Category getById(@PathVariable int id) {
         // get the category by id
         return (Category) categoryDao.getAllCategories();
@@ -56,7 +59,7 @@ public class CategoriesController {
 
     // add annotation to call this method for a POST action
     // add annotation to ensure that only an ADMIN can call this function
-    @GetMapping(path = "/categories", method = RequestMethod.POST)
+    @GetMapping(path = "b/categories", method = RequestMethod.POST)
     @ResponseStatus(value = HttpStatus.CREATED)
     //users with admin access are allowed to execute this.
     @PreAuthorize("hasRole('ROLEADMIN')")
