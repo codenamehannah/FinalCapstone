@@ -34,11 +34,9 @@ public class CategoriesController {
     @RequestMapping(path = "/categories", method = RequestMethod.GET)
     @PreAuthorize("permitAll()")
     public List<Category> getAll() {
-        try {
+
             return categoryDao.getAllCategories();
-        } catch (Exception ex) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "The code is taking a coffee break. Please caffeinate and try again! ");
-        }
+
     }
 
     // add the appropriate annotation for a get action
