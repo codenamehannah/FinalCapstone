@@ -1,6 +1,7 @@
 package org.yearup.data.mysql;
 
 import org.springframework.stereotype.Component;
+import org.yearup.models.Category;
 import org.yearup.models.Product;
 import org.yearup.data.ProductDao;
 
@@ -208,7 +209,7 @@ public class MySqlProductDao extends MySqlDaoBase implements ProductDao
         }
     }
 
-    protected static Product mapRow(ResultSet row) throws SQLException
+    protected static Category mapRow(ResultSet row) throws SQLException
     {
         int productId = row.getInt("product_id");
         String name = row.getString("name");

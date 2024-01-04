@@ -73,11 +73,10 @@ public class CategoriesController {
 
     // add annotation to call this method for a POST action
     // add annotation to ensure that only an ADMIN can call this function
-    @GetMapping(path = "b/categories", method = RequestMethod.POST)
-    @ResponseStatus(value = HttpStatus.CREATED)
+    @GetMapping(path = "/categories", method = RequestMethod.POST)
     //users with admin access are allowed to execute this.
-    @PreAuthorize("hasRole('ROLEADMIN')")
-    public Category addCategory(@RequestBody Category category) {
+
+        public Category addCategory(@RequestBody Category category) {
         try {
             return categoryDao.create(category);
         } catch (Exception ex) {
@@ -117,4 +116,4 @@ public class CategoriesController {
         throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "The code is taking a coffee break. Please caffeinate and try again! ");
     }
 }
-}
+
