@@ -209,7 +209,7 @@ public class MySqlProductDao extends MySqlDaoBase implements ProductDao
         }
     }
 
-    protected static Category mapRow(ResultSet row) throws SQLException
+    protected static Product mapRow(ResultSet row) throws SQLException
     {
         int productId = row.getInt("product_id");
         String name = row.getString("name");

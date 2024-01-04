@@ -24,23 +24,23 @@ public class MySqlCategoryDao extends MySqlDaoBase implements CategoryDao {
         String sql = "SELECT * FROM categories";
 
         try (Connection connection = getConnection();
-             PreparedStatement selectStatement = connection.prepareStatement(sql);
-             ResultSet resultSet = selectStatement.executeQuery()) {
+             PreparedStatement statement = connection.prepareStatement(sql);
+             ResultSet resultSet = statement.executeQuery()) {
 
             while (resultSet.next()) {
-
-                categories.add(mapRow(resultSet));
+                Category category = mapRow(resultSet);
+                categories.add(category);
             }
-          } catch (SQLException e){
-        e.printStackTrace();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
-        return categories;
-        }
+
+         return categories;
 
         @Override
         public Category getById(int categoryId){
         // get category by id
-        String sql = "SELECT * FROM categories WHERE category_id = ?";
+             String sql = "SELECT * FROM categories WHERE category_id = ?";
 
             try (Connection connection = getConnection();
                  PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -50,7 +50,7 @@ public class MySqlCategoryDao extends MySqlDaoBase implements CategoryDao {
                 try (ResultSet resultSet = statement.executeQuery()) {
 
                     if (resultSet.next()) {
-                        return category;
+                        return mapRow(resultSet);
                     }
                 }
             } catch (SQLException e) {
@@ -59,134 +59,93 @@ public class MySqlCategoryDao extends MySqlDaoBase implements CategoryDao {
             return null;
         }
 
-    @Override
-    public Category create(Category category) {
-        String sql = "INSERT INTO categories (name, description) VALUES (?, ?)";
+         @Override
+         public Category create(Category category)
+         {
+             // create a new category
+             String sql = "INSERT INTO categories(name, description) VALUES (?, ?)";
 
-        try (Connection connection = getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+             try (Connection connection = getConnection();
+                  PreparedStatement statement = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
 
-            statement.setString(1, category.getName());
-            statement.setString(2, category.getDescription());
+                 statement.setString(1, category.getName());
+                 statement.setString(2, category.getDescription());
 
-            int affectedRows = statement.executeUpdate();
+                 int rowsAffected = statement.executeUpdate();
 
-            if (affectedRows == 0) {
-                throw new SQLException("Creating category failed, no rows affected.");
-            }
+                 if (rowsAffected > 0) {
+                     try (var generatedKeys = statement.getGeneratedKeys()) {
+                         if (generatedKeys.next()) {
+                             int generatedId = generatedKeys.getInt(1);
+                             // set the generated ID to the category
+                             category.setCategoryId(generatedId);
+                             return category;
+                         }
+                     }
+                 }
 
-            try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    int generatedId = generatedKeys.getInt(1);
-                    category.setCategoryId(generatedId);
-                } else {
-                    throw new SQLException("Creating category failed, no ID obtained.");
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return category;
-    }
+             } catch (SQLException e) {
+                 throw new RuntimeException(e);
+             }
 
-    @Override
-    public void update(int categoryId, Category category) {
-        // update category
-    }
+             return null;
+         }
 
-    @Override
-    public void delete(int categoryId) {
-        // delete category
-    }
+         @Override
+         public void update(int categoryId, Category category)
+         {
+             // update category
+             String sql = "UPDATE categories SET name = ?, description = ? WHERE category_id = ?";
 
-    private Category mapRow(ResultSet row) throws SQLException {
-        int categoryId = row.getInt("category_id");
-        String name = row.getString("name");
-        String description = row.getString("description");
+             try (Connection connection = getConnection();
+                  PreparedStatement statement = connection.prepareStatement(sql)) {
 
-        Category category = new Category() {{
-            setCategoryId(categoryId);
-            setName(name);
-            setDescription(description);
-        }};
+                 statement.setString(1, category.getName());
+                 statement.setString(2, category.getDescription());
+                 statement.setInt(3, categoryId);
 
-        return category;
-    }
+                 statement.executeUpdate();
+
+             } catch (SQLException e) {
+                 throw new RuntimeException(e);
+             }
+         }
 
 
-    @Override
-    public Category create(Category category) {
-        //New Cat
-        String sql = "INSERT INTO categories(name, description) VALUES (?, ?)";
 
-        try (var connection = getConnection();
-             var statement = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
-            statement.setString(1, category.getName());
-            statement.setString(2, category.getDescription());
+         @Override
+         public void delete(int categoryId)
+         {
+             // delete category
+             String sql = "DELETE FROM categories WHERE category_id = ?";
 
-            int rowsAffected = statement.executeUpdate();
+             try (Connection connection = getConnection();
+                  PreparedStatement statement = connection.prepareStatement(sql)) {
 
-            if (rowsAffected > 0) {
-                try (var generatedKeys = statement.getGeneratedKeys()) {
-                    if (generatedKeys.next()) {
-                        int generatedID = generatedKeys.getInt(1);
-                        category.setCategoryId(generatedId);
-                        return category;
-                    }
-                }
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-        return null;
-    }
+                 statement.setInt(1, categoryId);
 
-    @Override
-    public void update(int categoryId, Category category) {
-        //the update category
-        String sql = "UPDATE categories SET name = ?, description = ? WHERE category_id = ?";
+                 statement.executeUpdate();
 
-        try (var connection = getConnection();
-             var statement = connection.prepareStatement(sql)) {
+             } catch (SQLException e) {
+                 throw new RuntimeException("Error deleting category with id " + categoryId, e);
+             }
+         }
 
-            statement.setString(1, category.getName());
-            statement.setString(2, category.getDescription());
-            statement.setString(3, categoryId);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
-    @Override
-    public void delete(int categoryId) {
-        //the delete category
-        String sql = "DELETE FROM categories WHERE category_id = ?";
+         private Category mapRow(ResultSet row) throws SQLException
+         {
+             int categoryId = row.getInt("category_id");
+             String name = row.getString("name");
+             String description = row.getString("description");
 
-        try (var connection = getConnection();
-             var statement = connection.prepareStatement(sql)) {
-            statement.setInt(1, categoryId);
-            statement.executeUpdate();
+             Category category = new Category()
+             {{
+                 setCategoryId(categoryId);
+                 setName(name);
+                 setDescription(description);
+             }};
 
-        } catch (SQLException e) {
-            throw new RuntimeException("There's and Error deleting this category: " + categoryId, e);
+             return category;
+         }
 
-        }
-    }
-
-    private Category mapRow(ResultSet row) throws SQLException
-    {
-        int categoryId = row.getInt("category_id");
-        String name = row.getString("name");
-        String description = row.getString("description");
-
-        Category category = new Category()
-        {{
-            setCategoryId(categoryId);
-            setName(name);
-            setDescription(description);
-        }};
-                return category;
-    }
-} catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+     }
