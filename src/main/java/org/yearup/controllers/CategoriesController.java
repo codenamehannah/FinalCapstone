@@ -31,49 +31,50 @@ public class CategoriesController {
         this.productDao = productDao;
     }
 
-    @GetMapping(path = "/categories", method = RequestMethod.GET)
+    @RequestMapping(path = "/categories", method = RequestMethod.GET)
     @PreAuthorize("permitAll()")
     public List<Category> getAll() {
         try {
             return categoryDao.getAllCategories();
         } catch (Exception ex) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "The code is taking a coffee break. Please caffeinate and try again! ")
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "The code is taking a coffee break. Please caffeinate and try again! ");
         }
     }
 
     // add the appropriate annotation for a get action
-@GetMapping(path = "/categories/{id}", method = RequestMethod.GET)
-@PreAuthorize("permitAll()")
+    @RequestMapping(path = "/categories/{id}", method = RequestMethod.GET)
+    @PreAuthorize("permitAll()")
     public Category getById(@PathVariable int id) {
         // get the category by id
-    try {
-        Category category = categoryDao.getById(id);
-        if (category == null)
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        try {
+            Category category = categoryDao.getById(id);
+            if (category == null)
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 
-        return category;
-    } catch (Exception ex) {
+            return category;
+        } catch (Exception ex) {
 
-        throw ex;
+            throw ex;
 
         }
     }
 
     // the url to return all products in category 1 would look like this
     // https://localhost:8080/categories/1/products
-    @GetMapping(path = "/categories{id}/products", method = RequestMethod.GET)
+    @RequestMapping(path = "/categories{id}/products", method = RequestMethod.GET)
     @PreAuthorize("permitAll()")
     public List<Product> getProductsById(@PathVariable int categoryId) {
         try {
             return productDao.listByCategoryId(categoryId);
 
         } catch (Exception ex) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "The code is taking a coffee break. Please caffeinate and try again!")
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "The code is taking a coffee break. Please caffeinate and try again!");
         }
+    }
 
         // add annotation to call this method for a POST action
         // add annotation to ensure that only an ADMIN can call this function
-        @GetMapping(path = "/categories", method = RequestMethod.POST)
+        @RequestMapping(path = "/categories", method = RequestMethod.POST)
         @ResponseStatus(value = HttpStatus.CREATED)
         @PreAuthorize("hasRole('ROLE_ADMIN')") // Annotation to ensure only an ADMIN can call this function
         //users with admin access are allowed to execute this.
@@ -88,7 +89,7 @@ public class CategoriesController {
 
         // add annotation to call this method for a PUT (update) action - the url path must include the categoryId
         // add annotation to ensure that only an ADMIN can call this function
-        @GetMapping(path = "/categories/{id}", method = RequestMethod.PUT)
+        @RequestMapping(path = "/categories/{id}", method = RequestMethod.PUT)
         @PreAuthorize("hasRole('ROLE_ADMIN')") //reserved for admins to call
         public void updateCategory ( @PathVariable int id, @RequestBody Category category){
             try {
@@ -102,7 +103,7 @@ public class CategoriesController {
 
         // add annotation to call this method for a DELETE action - the url path must include the categoryId
         // add annotation to ensure that only an ADMIN can call this function
-        @GetMapping(path = "/categories/{id}", method = RequestMethod.DELETE)
+        @RequestMapping(path = "/categories/{id}", method = RequestMethod.DELETE)
         @ResponseStatus(value = HttpStatus.NO_CONTENT)
         @PreAuthorize("hasRole('ROLE_ADMIN')") //reserved for admins to call
         public void deleteCategory ( @PathVariable int id){
@@ -118,5 +119,4 @@ public class CategoriesController {
                 throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "The code is taking a coffee break. Please caffeinate and try again! ");
             }
         }
-
     }
