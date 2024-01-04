@@ -47,7 +47,7 @@ public class CategoriesController {
     public Category getById(@PathVariable int id) {
         // get the category by id
     try {
-        var category = categoryDao.getById(id);
+        Category category = categoryDao.getById(id);
         if (category == null)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 
