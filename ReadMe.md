@@ -6,9 +6,6 @@ Utilizing Spring Boot, it establishes a connection with a SQL database, complete
 ## ***Table of Contents***
 - Set Up
 - Tech Used
-- Screenshots
-- Future Works
-- Resources
 - Credits
 
 
